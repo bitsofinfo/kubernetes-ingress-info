@@ -16,7 +16,7 @@ accordingly as many of these platforms rely on simple HTTP 200 OK type of "check
 
 * [Use case](#usecase)
 * [Install/Setup](#req)
-* [Example](#background)
+* [Example](#example)
 * [API](#api)
 * [Usage](#usage)
 
