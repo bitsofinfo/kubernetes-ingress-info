@@ -102,6 +102,12 @@ curl http://kubernetes-ingress-info.local/non-existant-host.com
 }
 ```
 
+Cleanup:
+```
+kubectl delete -f examples/example.yaml
+```
+
+
 ## <a name="api"></a>API:
 
 The API is as follows:
