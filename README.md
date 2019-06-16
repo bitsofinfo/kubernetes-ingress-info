@@ -31,7 +31,7 @@ it could potentially be deployed on, *clusterA*, *clusterB* and *clusterC*. Gene
 you will have another cloud load balancer device or you are just using some sort of DNS device to control what cluster *LoadBalancer* IPs are relevant for each application at any given time. So what you can do in this case is list all possible cluster IPs as possible targets for those FQDNs hostname, but enable/disable them based on calls to `kubernetes-ingress-info` which
 resides on all clusters. For this to work, you should ensure each possible target cluster `Ingress Controller` that is behind a `LoadBalancer` has `kubernetes-ingress-info` accessible via its own unique `Ingress`.
 
-![diag](/doc/diag1.png "Diagram1")
+![diag](/docs/diag1.png "Diagram1")
 
 ## <a id="req"></a>Install/Setup
 
