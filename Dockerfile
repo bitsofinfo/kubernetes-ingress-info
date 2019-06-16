@@ -7,18 +7,17 @@ RUN echo GIT_TAG=${GIT_TAG}
 # install the checker under /usr/local/bin
 RUN apk update ; \
     apk upgrade ; \
-    apk add git ; \
+    apk add git bash build-base ; \
     echo $PATH ; \
     git clone --branch ${GIT_TAG} https://github.com/bitsofinfo/kubernetes-ingress-info.git ; \
     cd /kubernetes-ingress-info; git status; rm -rf .git; cd / ; \
     cp /kubernetes-ingress-info/*.py /usr/local/bin/ ; \
     rm -rf /kubernetes-ingress-info ; \
-    apk del git ; \
+    pip install --upgrade pip kubernetes twisted ; \
+    apk del git build-base bash; \
     ls -al /usr/local/bin ; \
     chmod +x /usr/local/bin/*.py ; \
-    rm -rf /var/cache/apk/*
-
-# required modules
-RUN pip install --upgrade pip kubernetes twisted
+    rm -rf /var/cache/apk/* ; \
+    rm -rf /root/.cache
 
 ENV PATH="/usr/local/bin/;$PATH"
