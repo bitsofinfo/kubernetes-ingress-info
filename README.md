@@ -10,11 +10,28 @@ endpoint to interrogate for this status.
 
 This tool was specifically developed to serve as a endpoint for various cloud load-balancers
 and DNS services to be able to auto-detect *which* Kubernetes clusters are valid for a specific `host` FQDN.
+This can aid in workload migration across various clusters or just enable workloads to be deployed to subsets
+of clusters out of many organizational clusters, while letting upstream DNS and or glsb based devices react
+accordingly as many of these platforms rely on simple HTTP 200 OK type of "checks".
 
+* [Use case](#usecase)
 * [Install/Setup](#req)
 * [Example](#background)
-* [Usage](#usage)
 * [API](#api)
+* [Usage](#usage)
+
+
+## <a name="usecase"></a>Use case:
+
+This tool was specifically developed to serve as a endpoint for various cloud load-balancers
+and DNS services to be able to auto-detect *which* Kubernetes clusters are valid for a specific `host` FQDN.
+
+Lets say you have two apps available at **a.b.com** and **x.y.com** and you have 3 available Kubernetes
+it could potentially be deployed on, *clusterA*, *clusterB* and *clusterC*. Generally upstream from your cluster *LoadBalancers*
+you will have another cloud load balancer device or you are just using some sort of DNS device to control what cluster *LoadBalancer* IPs are relevant for each application at any given time. So what you can do in this case is list all possible cluster IPs as possible targets for those FQDNs hostname, but enable/disable them based on calls to `kubernetes-ingress-info` which
+resides on all clusters. For this to work, you should ensure each possible target cluster `Ingress Controller` that is behind a `LoadBalancer` has `kubernetes-ingress-info` accessible via its own unique `Ingress`.
+
+![diag](/doc/diag1.png "Diagram1")
 
 ## <a id="req"></a>Install/Setup
 
@@ -38,6 +55,8 @@ rules:
   resources: ["ingresses"]
   verbs: ["list"]
 ```
+
+
 
 ## <a name="example"></a>Example:
 
