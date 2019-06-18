@@ -13,11 +13,13 @@ RUN apk update ; \
     cd /kubernetes-ingress-info; git status; rm -rf .git; cd / ; \
     cp /kubernetes-ingress-info/*.py /usr/local/bin/ ; \
     rm -rf /kubernetes-ingress-info ; \
-    pip install --upgrade pip kubernetes twisted ; \
+    pip install --upgrade pip kubernetes twisted diskcache; \
     apk del git build-base bash; \
     ls -al /usr/local/bin ; \
     chmod +x /usr/local/bin/*.py ; \
     rm -rf /var/cache/apk/* ; \
     rm -rf /root/.cache
+
+RUN mkdir -p /opt/kubernetes-ingress-info/cache
 
 ENV PATH="/usr/local/bin/;$PATH"

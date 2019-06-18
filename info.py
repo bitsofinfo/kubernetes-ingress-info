@@ -12,6 +12,7 @@ from twisted.web import server, resource
 from twisted.internet import reactor, endpoints
 import time
 import threading
+from diskcache import Cache
 
 
 class IngressInfo(resource.Resource):
@@ -21,6 +22,8 @@ class IngressInfo(resource.Resource):
     exclude_label_selectors = None
     include_label_selectors = None
     namespaces = None
+    cache = None
+    cache_ttl_seconds = 300
 
     # initialize our client for proper k8s config
     def init(self):
@@ -32,8 +35,13 @@ class IngressInfo(resource.Resource):
         self.v1Api = client.ExtensionsV1beta1Api()
 
     # fetches the Ingress database
-    # TODO: caching?
     def getIngressDb(self):
+
+        if self.cache is not None:
+            cachedIngressDb = self.cache.get(b'INGRESS_DB')
+            if cachedIngressDb is not None:
+                return cachedIngressDb
+
 
         fetchedIngresses = []
 
@@ -83,6 +91,9 @@ class IngressInfo(resource.Resource):
                 ingressInfo = { 'host':r.host.lower() }
                 ingressDb['unique_hosts'].add(r.host.lower())
 
+        if self.cache is not None:
+            self.cache.set(b'INGRESS_DB', value=ingressDb, expire=self.cache_ttl_seconds)
+
         return ingressDb
 
 
@@ -120,29 +131,46 @@ class IngressInfo(resource.Resource):
             return json.dumps(toReturn, indent=2).encode("UTF-8")
 
 
-def init(load_config_mode, listen_port, include_label_selectors, exclude_label_selectors, namespaces):
-
-    endpoint = IngressInfo()
-    endpoint.load_config_mode = load_config_mode
-    endpoint.include_label_selectors = include_label_selectors
-    endpoint.exclude_label_selectors = exclude_label_selectors
-    endpoint.namespaces = namespaces
-    endpoint.init()
-    endpoints.serverFromString(reactor, "tcp:" + str(listen_port)).listen(server.Site(endpoint))
-
-    # start it up
-    httpdthread = threading.Thread(target=reactor.run,args=(False,))
-    httpdthread.daemon = True
-    httpdthread.start()
-
-    logging.info("init() listening on %d" % listen_port)
+def init(load_config_mode, \
+         listen_port, \
+         enable_cache, \
+         cache_dir, \
+         cache_ttl_seconds, \
+         include_label_selectors, \
+         exclude_label_selectors, \
+         namespaces):
 
     try:
-        while True:
-            time.sleep(30)
-    except KeyboardInterrupt:
-        print("Exiting...")
+        endpoint = IngressInfo()
+        endpoint.load_config_mode = load_config_mode
+        endpoint.include_label_selectors = include_label_selectors
+        endpoint.exclude_label_selectors = exclude_label_selectors
+        endpoint.namespaces = namespaces
+        if enable_cache:
+            logging.info("init() caching enabled @ %s (TTL %d seconds)" % (cache_dir, cache_ttl_seconds))
+            endpoint.cache = Cache(cache_dir)
+            endpoint.cache_ttl_seconds = cache_ttl_seconds
+        endpoint.init()
+        endpoints.serverFromString(reactor, "tcp:" + str(listen_port)).listen(server.Site(endpoint))
 
+
+        # start it up
+        httpdthread = threading.Thread(target=reactor.run,args=(False,))
+        httpdthread.daemon = True
+        httpdthread.start()
+
+        logging.info("init() listening on %d" % listen_port)
+
+        try:
+            while True:
+                time.sleep(30)
+        except KeyboardInterrupt:
+            print("Exiting...")
+
+
+    except Exception as e:
+        logging.exception("init() unexpected error: " +  str(sys.exc_info()))
+        sys.exit(1)
 
 
 ###########################
@@ -160,6 +188,12 @@ if __name__ == '__main__':
         help="Optional comma delimited of Namespaces to scope Ingress fetch within")
     parser.add_argument('-p', '--listen-port', dest='listen_port', \
         help="Port to listen on, default 8081", type=int, default=8081)
+    parser.add_argument('-c', '--enable-cache', action='store_true', default=False, \
+        help="Optional, enabling caching (uses https://github.com/grantjenks/python-diskcache)")
+    parser.add_argument('-e', '--cache-ttl-seconds', dest="cache_ttl_seconds", default=30, \
+        help="Optional, cache TTL in seconds")
+    parser.add_argument('-d', '--cache-dir', dest="cache_dir", default="/opt/kubernetes-ingress-info/cache", \
+        help="Optional, cache dir, default /opt/kubernetes-ingress-info/cache")
     parser.add_argument('-l', '--log-level', dest='log_level', default="DEBUG", \
         help="log level, default DEBUG ")
     parser.add_argument('-b', '--log-file', dest='log_file', default=None, \
@@ -191,6 +225,9 @@ if __name__ == '__main__':
     # invoke!
     init(args.load_config_mode, \
          args.listen_port,
+         args.enable_cache,
+         args.cache_dir,
+         args.cache_ttl_seconds,
          args.include_label_selectors,
          dictExcludeLabelSelectors,
          listNamespaces)
