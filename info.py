@@ -190,7 +190,7 @@ if __name__ == '__main__':
         help="Port to listen on, default 8081", type=int, default=8081)
     parser.add_argument('-c', '--enable-cache', action='store_true', default=False, \
         help="Optional, enabling caching (uses https://github.com/grantjenks/python-diskcache)")
-    parser.add_argument('-e', '--cache-ttl-seconds', dest="cache_ttl_seconds", default=30, \
+    parser.add_argument('-e', '--cache-ttl-seconds', dest="cache_ttl_seconds", type=int, default=30, \
         help="Optional, cache TTL in seconds")
     parser.add_argument('-d', '--cache-dir', dest="cache_dir", default="/opt/kubernetes-ingress-info/cache", \
         help="Optional, cache dir, default /opt/kubernetes-ingress-info/cache")
