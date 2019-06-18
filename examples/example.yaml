@@ -55,7 +55,7 @@ spec:
       serviceAccountName: bof-ingress-info
       containers:
         - name: kubernetes-ingress-info
-          image: bitsofinfo/kubernetes-ingress-info:1.0.2
+          image: bitsofinfo/kubernetes-ingress-info:1.0.3
           ports:
             - name: info-port
               containerPort: 8081
