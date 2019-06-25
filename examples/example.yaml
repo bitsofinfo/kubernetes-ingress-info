@@ -61,7 +61,7 @@ spec:
               containerPort: 8081
           livenessProbe:
             httpGet:
-              scheme: HTTPS
+              scheme: HTTP
               path: /
               port: 8081
             periodSeconds: 15
