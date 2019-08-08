@@ -36,7 +36,10 @@ resides on all clusters. For this to work, you should ensure each possible targe
 
 ## <a id="req"></a>Install/Setup
 
-Run via Docker:
+Helm chart:  
+https://github.com/boarder981/k8s-ingress-info
+
+Run via Docker:  
 https://hub.docker.com/r/bitsofinfo/kubernetes-ingress-info
 
 Otherwise:
