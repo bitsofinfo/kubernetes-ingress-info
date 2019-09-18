@@ -121,11 +121,11 @@ class IngressInfo(resource.Resource):
                 # if host-match-on-header was specified... check for it
                 elif self.host_match_on_header and \
                      self.host_match_on_header.strip() != "" and \
-                     requestUri.getHeader(self.host_match_on_header) and \
-                     requestUri.getHeader(self.host_match_on_header).strip() != "" and \
-                     requestUri.getHeader(self.host_match_on_header).lower() in ingressDb['unique_hosts']:
+                     request.getHeader(self.host_match_on_header) and \
+                     request.getHeader(self.host_match_on_header).strip() != "" and \
+                     request.getHeader(self.host_match_on_header).lower() in ingressDb['unique_hosts']:
                     
-                    toReturn = {'info':("'%s' found" % requestUri.getHeader(self.host_match_on_header))}
+                    toReturn = {'info':("'%s' found" % request.getHeader(self.host_match_on_header))}
 
                 # otherwise no match
                 else:

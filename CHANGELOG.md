@@ -1,3 +1,6 @@
+# 1.0.6
+* Fix bug when `--host-match-on-header` is present for `str' object has no attribute 'getHeader`
+
 # 1.0.5
 * Fix bug when `--host-match-on-header` is present
 
