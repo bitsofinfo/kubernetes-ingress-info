@@ -1,3 +1,6 @@
+# 1.0.4
+* Add new option to check for custom header to indicate the ingress host to check, if path does not match
+
 # 1.0.3
 * dummy tag
 

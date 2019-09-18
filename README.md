@@ -126,6 +126,14 @@ GET a specific `host`. Returns 200 if `host` exists, or a 404 if non-existant
 curl -X GET http[s]://[kubernetes-ingress-info]/[host]
 ```
 
+Note that if you startup `info.py` with the `--host-match-on-header <headername>` value, the named HTTP request header
+will be checked for a `host`. This `host` name will then be used if the `/<path>` host is not found
+
+GET a specific `host` (via custom header). Returns 200 if `host` exists, or a 404 if non-existant
+```
+curl -X GET http[s]://[kubernetes-ingress-info]/anything -H '<--host-match-on-header header name>: [host]'
+```
+
 ## <a name="cache"></a>Caching:
 
 If you enable caching w/ `--enable-cache` the internal Ingress database that is constructed
@@ -143,50 +151,56 @@ and active project activity.
 bash-4.4$ python3 info.py -h
 
 usage: info.py [-h] [-r LOAD_CONFIG_MODE] [-i INCLUDE_LABEL_SELECTORS]
-               [-x EXCLUDE_LABEL_SELECTORS] [-n NAMESPACES] [-p LISTEN_PORT]
-               [-l LOG_LEVEL] [-b LOG_FILE]
+               [-x EXCLUDE_LABEL_SELECTORS] [-n NAMESPACES]
+               [-m HOST_MATCH_ON_HEADER] [-p LISTEN_PORT] [-c]
+               [-e CACHE_TTL_SECONDS] [-d CACHE_DIR] [-l LOG_LEVEL]
+               [-b LOG_FILE]
 
-               optional arguments:
-                 -h, --help            show this help message and exit
-                 -r LOAD_CONFIG_MODE, --load-config-mode LOAD_CONFIG_MODE
-                                       How the target k8s cluster config will be loaded,
-                                       'local' will leverage the current kubectl context from
-                                       '~/.kube/config', while 'cluster' will talk direct to
-                                       the cluster the process is executing in using the
-                                       Pod's configured serviceAccount which needs read
-                                       access to all objects of type Ingress. Default 'local'
-                 -i INCLUDE_LABEL_SELECTORS, --include-label-selectors INCLUDE_LABEL_SELECTORS
-                                       Optional comma delimited of Ingress
-                                       label1=value,label2=value pairs that will be used to
-                                       build the database of IngressInfo objects available to
-                                       be fetched. If specified, ONLY Ingress objects having
-                                       ALL specified labels will be retrieved. If not
-                                       specified, ALL available Ingress objects will be
-                                       retrieved from k8s. Excludes take precendence over
-                                       includes.
-                 -x EXCLUDE_LABEL_SELECTORS, --exclude-label-selectors EXCLUDE_LABEL_SELECTORS
-                                       Optional comma delimited of Ingress
-                                       label1=value,label2=value pairs that will be used to
-                                       restrict the database of IngressInfo objects available
-                                       to be fetched. If specified, ONLY Ingress objects NOT
-                                       having ANY of the specified labels will be retrieved.
-                                       If not specified, ALL available Ingress objects will
-                                       be retrieved from k8s. Excludes take precendence over
-                                       includes.
-                 -n NAMESPACES, --namespace NAMESPACES
-                                       Optional comma delimited of Namespaces to scope
-                                       Ingress fetch within
-                 -p LISTEN_PORT, --listen-port LISTEN_PORT
-                                       Port to listen on, default 8081
-                 -c, --enable-cache    Optional, enabling caching (uses
-                                       https://github.com/grantjenks/python-diskcache)
-                 -e CACHE_TTL_SECONDS, --cache-ttl-seconds CACHE_TTL_SECONDS
-                                       Optional, cache TTL in seconds
-                 -d CACHE_DIR, --cache-dir CACHE_DIR
-                                       Optional, cache dir, default /opt/kubernetes-ingress-
-                                       info/cache
-                 -l LOG_LEVEL, --log-level LOG_LEVEL
-                                       log level, default DEBUG
-                 -b LOG_FILE, --log-file LOG_FILE
-                                       Path to log file, default None, STDOUT
+optional arguments:
+  -h, --help            show this help message and exit
+  -r LOAD_CONFIG_MODE, --load-config-mode LOAD_CONFIG_MODE
+                        How the target k8s cluster config will be loaded,
+                        'local' will leverage the current kubectl context from
+                        '~/.kube/config', while 'cluster' will talk direct to
+                        the cluster the process is executing in using the
+                        Pod's configured serviceAccount which needs read
+                        access to all objects of type Ingress. Default 'local'
+  -i INCLUDE_LABEL_SELECTORS, --include-label-selectors INCLUDE_LABEL_SELECTORS
+                        Optional comma delimited of Ingress
+                        label1=value,label2=value pairs that will be used to
+                        build the database of IngressInfo objects available to
+                        be fetched. If specified, ONLY Ingress objects having
+                        ALL specified labels will be retrieved. If not
+                        specified, ALL available Ingress objects will be
+                        retrieved from k8s. Excludes take precendence over
+                        includes.
+  -x EXCLUDE_LABEL_SELECTORS, --exclude-label-selectors EXCLUDE_LABEL_SELECTORS
+                        Optional comma delimited of Ingress
+                        label1=value,label2=value pairs that will be used to
+                        restrict the database of IngressInfo objects available
+                        to be fetched. If specified, ONLY Ingress objects NOT
+                        having ANY of the specified labels will be retrieved.
+                        If not specified, ALL available Ingress objects will
+                        be retrieved from k8s. Excludes take precendence over
+                        includes.
+  -n NAMESPACES, --namespace NAMESPACES
+                        Optional comma delimited of Namespaces to scope
+                        Ingress fetch within
+  -m HOST_MATCH_ON_HEADER, --host-match-on-header HOST_MATCH_ON_HEADER
+                        Optional name of HTTP Request header who's value will
+                        be inspected for an Ingress host match, should the
+                        default path based /[host] not find a match.
+  -p LISTEN_PORT, --listen-port LISTEN_PORT
+                        Port to listen on, default 8081
+  -c, --enable-cache    Optional, enabling caching (uses
+                        https://github.com/grantjenks/python-diskcache)
+  -e CACHE_TTL_SECONDS, --cache-ttl-seconds CACHE_TTL_SECONDS
+                        Optional, cache TTL in seconds
+  -d CACHE_DIR, --cache-dir CACHE_DIR
+                        Optional, cache dir, default /opt/kubernetes-ingress-
+                        info/cache
+  -l LOG_LEVEL, --log-level LOG_LEVEL
+                        log level, default DEBUG
+  -b LOG_FILE, --log-file LOG_FILE
+                        Path to log file, default None, STDOUT
 ```                        

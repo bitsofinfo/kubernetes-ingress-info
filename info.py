@@ -24,6 +24,7 @@ class IngressInfo(resource.Resource):
     namespaces = None
     cache = None
     cache_ttl_seconds = 300
+    host_match_on_header = None
 
     # initialize our client for proper k8s config
     def init(self):
@@ -112,11 +113,21 @@ class IngressInfo(resource.Resource):
 
             # otherwise we assume the request is checking a fqdn/host existence in ingressDb
             else:
-                # assume the uri is a host
+                # assume the uri path is a host
                 hostToCheck = requestUri.replace("/","")
                 if hostToCheck.lower() in ingressDb['unique_hosts']:
                     toReturn = {'info':("'%s' found" % hostToCheck)}
 
+                # if host-match-on-header was specified... check for it
+                elif self.host_match_on_header and \
+                     self.host_match_on_header.strip() != "" and \
+                     requestUri.getHeader(self.host_match_on_header) and \
+                     requestUri.getHeader(self.host_match_on_header).strip() != "" and \
+                     requestUri.getHeader(self.host_match_on_header).lower() in ingressDb['unique_hosts']:
+                    
+                    toReturn = {'info':("'%s' found" % requestUri.getHeader(self.host_match_on_header))}
+
+                # otherwise no match
                 else:
                     toReturn = {'error':("'%s' 404 not found" % hostToCheck)}
                     request.setResponseCode(404)
@@ -138,6 +149,7 @@ def init(load_config_mode, \
          cache_ttl_seconds, \
          include_label_selectors, \
          exclude_label_selectors, \
+         host_match_on_header, \
          namespaces):
 
     try:
@@ -146,6 +158,7 @@ def init(load_config_mode, \
         endpoint.include_label_selectors = include_label_selectors
         endpoint.exclude_label_selectors = exclude_label_selectors
         endpoint.namespaces = namespaces
+        endpoint.host_match_on_header = host_match_on_header
         if enable_cache:
             logging.info("init() caching enabled @ %s (TTL %d seconds)" % (cache_dir, cache_ttl_seconds))
             endpoint.cache = Cache(cache_dir)
@@ -186,6 +199,8 @@ if __name__ == '__main__':
         help="Optional comma delimited of Ingress label1=value,label2=value pairs that will be used to restrict the database of IngressInfo objects available to be fetched. If specified, ONLY Ingress objects NOT having ANY of the specified labels will be retrieved. If not specified, ALL available Ingress objects will be retrieved from k8s. Excludes take precendence over includes.")
     parser.add_argument('-n', '--namespace', dest="namespaces", default=None, \
         help="Optional comma delimited of Namespaces to scope Ingress fetch within")
+    parser.add_argument('-m', '--host-match-on-header', dest="host_match_on_header", default=None, \
+        help="Optional name of HTTP Request header who's value will be inspected for an Ingress host match, should the default path based /[host] not find a match.")
     parser.add_argument('-p', '--listen-port', dest='listen_port', \
         help="Port to listen on, default 8081", type=int, default=8081)
     parser.add_argument('-c', '--enable-cache', action='store_true', default=False, \
@@ -229,5 +244,6 @@ if __name__ == '__main__':
          args.cache_dir,
          args.cache_ttl_seconds,
          args.include_label_selectors,
+         args.host_match_on_header,
          dictExcludeLabelSelectors,
          listNamespaces)
