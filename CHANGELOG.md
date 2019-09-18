@@ -1,3 +1,6 @@
+# 1.0.5
+* Fix bug when `--host-match-on-header` is present
+
 # 1.0.4
 * Add new option to check for custom header to indicate the ingress host to check, if path does not match
 

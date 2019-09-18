@@ -149,8 +149,8 @@ def init(load_config_mode, \
          cache_ttl_seconds, \
          include_label_selectors, \
          exclude_label_selectors, \
-         host_match_on_header, \
-         namespaces):
+         namespaces, \
+         host_match_on_header):
 
     try:
         endpoint = IngressInfo()
@@ -244,6 +244,6 @@ if __name__ == '__main__':
          args.cache_dir,
          args.cache_ttl_seconds,
          args.include_label_selectors,
-         args.host_match_on_header,
          dictExcludeLabelSelectors,
-         listNamespaces)
+         listNamespaces,
+         args.host_match_on_header)
