@@ -46,6 +46,8 @@ Otherwise:
 
 **Python 3.6+**
 
+**Kubernetes version 1.19+**
+
 Dependencies: See [Dockerfile](Dockerfile)
 
 When deploying to a Kubernetes cluster the `Pod` that `kubernetes-ingress-info` is
@@ -55,7 +57,7 @@ deployed as needs to run as a `serviceAccount` with (at a minimum) a binding to 
 ```
 ...
 rules:
-- apiGroups: ["extensions"]
+- apiGroups: ["networking.k8s.io"]
   resources: ["ingresses"]
   verbs: ["list"]
 ```
