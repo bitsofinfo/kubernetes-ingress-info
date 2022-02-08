@@ -33,7 +33,7 @@ class IngressInfo(resource.Resource):
         else:
             config.load_incluster_config()
 
-        self.v1Api = client.ExtensionsV1beta1Api()
+        self.v1Api = client.NetworkingV1Api()
 
     # fetches the Ingress database
     def getIngressDb(self):
@@ -89,8 +89,9 @@ class IngressInfo(resource.Resource):
                 continue;
 
             for r in i.spec.rules:
-                ingressInfo = { 'host':r.host.lower() }
-                ingressDb['unique_hosts'].add(r.host.lower())
+                if r.host is not None:
+                    ingressInfo = { 'host':r.host.lower() }
+                    ingressDb['unique_hosts'].add(r.host.lower())
 
         if self.cache is not None:
             self.cache.set(b'INGRESS_DB', value=ingressDb, expire=self.cache_ttl_seconds)
