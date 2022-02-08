@@ -17,7 +17,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: bof-ingress-info
 rules:
-- apiGroups: ["extensions"]
+- apiGroups: ["networking.k8s.io"]
   resources: ["ingresses"]
   verbs: ["list"]
 
@@ -55,7 +55,7 @@ spec:
       serviceAccountName: bof-ingress-info
       containers:
         - name: kubernetes-ingress-info
-          image: bitsofinfo/kubernetes-ingress-info:1.0.3
+          image: bitsofinfo/kubernetes-ingress-info:latest
           ports:
             - name: info-port
               containerPort: 8081
@@ -97,7 +97,7 @@ spec:
     targetPort: info-port
 
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   namespace: bitsofinfo
@@ -107,6 +107,9 @@ spec:
     - host: kubernetes-ingress-info.local
       http:
         paths:
-          - backend:
-              serviceName: kubernetes-ingress-info
-              servicePort: 31311
+          - pathType: ImplementationSpecific
+            backend:
+              service:
+                name: kubernetes-ingress-info
+                port:
+                  number: 31311
